@@ -3,7 +3,7 @@ package com.docmate.dto;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record AlertResponse(
+public record UpcomingRenewalResponse(
 
         UUID id,
         String documentName,

@@ -21,6 +21,8 @@ public class User {
 
     @Column(unique = true, nullable = false)
     private String email;
-
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private Integer reminderDays = 7;
 }

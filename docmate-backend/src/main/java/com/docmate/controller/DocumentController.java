@@ -5,9 +5,7 @@ import com.docmate.entity.Document;
 import com.docmate.entity.User;
 import com.docmate.repository.DocumentRepository;
 import com.docmate.repository.UserRepository;
-import com.docmate.service.DocumentAnalyzerService;
-import com.docmate.service.DocumentService;
-import com.docmate.service.OcrService;
+import com.docmate.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -15,7 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import com.docmate.service.FileStorageService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -115,8 +112,8 @@ public class DocumentController {
         );
     }
 
-    @GetMapping("/alerts")
-    public ResponseEntity<List<AlertResponse>> getAlerts() {
+    @GetMapping("/dashboardalerts")
+    public ResponseEntity<List<AlertResponse>> getDashboardAlerts() {
 
         return ResponseEntity.ok(
                 documentService.getDashboardAlerts()
@@ -162,6 +159,30 @@ public class DocumentController {
         return ResponseEntity.ok(
                 documentService.getRecentDocuments()
         );
+
+    }
+
+    @GetMapping("/upcoming-renewals")
+    public ResponseEntity<List<UpcomingRenewalResponse>> getUpcomingRenewals() {
+
+        return ResponseEntity.ok(
+                documentService.getUpcomingRenewals()
+        );
+
+    }
+
+    @GetMapping("/alert")
+    public ResponseEntity<List<AlertResponse>> getAlerts() {
+        return ResponseEntity.ok(
+                documentService.getAlerts()
+        );
+    }
+
+    @GetMapping("/alerts/count")
+    public long getAlertCount() {
+        return documentService
+                .getDashboardAlerts()
+                .size();
 
     }
 }
