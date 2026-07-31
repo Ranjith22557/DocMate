@@ -35,98 +35,98 @@ import { useNavigate } from "react-router-dom";
 
 function Documents() {
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [documents, setDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
 
-    const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("");
 
-    useEffect(() => {
+  useEffect(() => {
 
-        loadDocuments();
+    loadDocuments();
 
-    }, []);
+  }, []);
 
-    const loadDocuments = async () => {
+  const loadDocuments = async () => {
 
-        try {
+    try {
 
-            const response = await api.get("/documents");
+      const response = await api.get("/documents");
 
-            setDocuments(response.data);
+      setDocuments(response.data);
 
-        } catch (error) {
+    } catch (error) {
 
-            console.error(error);
+      console.error(error);
 
-        }
+    }
 
-    };
+  };
 
-    const filteredDocuments = useMemo(() => {
+  const filteredDocuments = useMemo(() => {
 
-        return documents.filter((doc) =>
+    return documents.filter((doc) =>
 
-            doc.documentName
-                .toLowerCase()
-                .includes(search.toLowerCase())
+      doc.documentName
+        .toLowerCase()
+        .includes(search.toLowerCase())
 
-            ||
+      ||
 
-            doc.documentType
-                .toLowerCase()
-                .includes(search.toLowerCase())
+      doc.documentType
+        .toLowerCase()
+        .includes(search.toLowerCase())
 
-        );
+    );
 
-    }, [documents, search]);
+  }, [documents, search]);
 
   const getStatusChip = (status: string) => {
 
     switch (status) {
 
-        case "ACTIVE":
+      case "ACTIVE":
 
-            return (
-                <Chip
-                    label="Active"
-                    color="success"
-                    size="small"
-                />
-            );
+        return (
+          <Chip
+            label="Active"
+            color="success"
+            size="small"
+          />
+        );
 
-        case "EXPIRING_SOON":
+      case "EXPIRING_SOON":
 
-            return (
-                <Chip
-                    label="Expiring Soon"
-                    color="warning"
-                    size="small"
-                />
-            );
+        return (
+          <Chip
+            label="Expiring Soon"
+            color="warning"
+            size="small"
+          />
+        );
 
-        case "EXPIRED":
+      case "EXPIRED":
 
-            return (
-                <Chip
-                    label="Expired"
-                    color="error"
-                    size="small"
-                />
-            );
+        return (
+          <Chip
+            label="Expired"
+            color="error"
+            size="small"
+          />
+        );
 
-        default:
+      default:
 
-            return (
-                <Chip
-                    label="No Renewal"
-                    size="small"
-                />
-            );
+        return (
+          <Chip
+            label="No Renewal"
+            size="small"
+          />
+        );
 
     }
 
-};
+  };
 
   const viewDocument = async (id: string) => {
 
@@ -139,10 +139,12 @@ function Documents() {
         }
       );
 
+      const contentType = response.headers["content-type"] as string | undefined;
+
       const file = new Blob(
         [response.data],
         {
-          type: "application/pdf"
+          type: contentType
         }
       );
 
@@ -233,261 +235,261 @@ function Documents() {
   const columns: GridColDef[] = [
 
     {
-        field: "documentName",
-        headerName: "Document",
-        flex: 2,
-        minWidth: 220,
+      field: "documentName",
+      headerName: "Document",
+      flex: 2,
+      minWidth: 220,
 
-        renderCell: (params) => (
+      renderCell: (params) => (
 
-            <Box
-                sx={{
-                  display: "flex",
-                  gap: 2,
-                  alignItems: "center",
-                  height: "100%"
-                }}
-            >
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            alignItems: "center",
+            height: "100%"
+          }}
+        >
 
-                <Avatar
-                    sx={{
-                        bgcolor: "#1976d2",
-                        width: 38,
-                        height: 38
-                    }}
-                >
-                    <DescriptionIcon />
-                </Avatar>
-
-                <Typography
-                    sx={{
-                        fontWeight: 600
-                    }}
-                >
-                    {params.row.documentName}
-                </Typography>
-
-            </Box>
-
-        )
-    },
-
-    {
-        field: "documentType",
-        headerName: "Type",
-        flex: 1,
-        minWidth: 120
-    },
-
-    {
-        field: "expiryDate",
-        headerName: "Expiry",
-        flex: 1,
-        minWidth: 120,
-
-        renderCell: (params) =>
-
-            params.value ?? "-"
-    },
-
-    {
-        field: "status",
-        headerName: "Status",
-        flex: 1,
-        minWidth: 140,
-
-        renderCell: (params) =>
-            getStatusChip(params.value)
-    },
-
-    {
-        field: "confidence",
-        headerName: "Confidence",
-        flex: 0.08,
-        minWidth: 100,
-
-        renderCell: (params) => (
-
-            <Chip
-                label={`${params.value}%`}
-                color="primary"
-                size="small"
-            />
-
-        )
-    },
-
-    {
-        field: "actions",
-        headerName: "Actions",
-        sortable: false,
-        filterable: false,
-        minWidth: 140,
-
-        renderCell: (params) => (
-
-            <Stack
-                direction="row"
-                spacing={1}
-            >
-
-                <Tooltip title="View">
-
-                    <IconButton
-                        color="primary"
-                        onClick={() =>
-                            viewDocument(params.row.id)
-                        }
-                    >
-                        <VisibilityIcon />
-                    </IconButton>
-
-                </Tooltip>
-
-                <Tooltip title="Download">
-
-                    <IconButton
-                        color="success"
-                        onClick={() =>
-                            downloadDocument(
-                                params.row.id,
-                                params.row.documentName
-                            )
-                        }
-                    >
-                        <DownloadIcon />
-                    </IconButton>
-
-                </Tooltip>
-
-                <Tooltip title="Delete">
-
-                    <IconButton
-                        color="error"
-                        onClick={() =>
-                            deleteDocument(params.row.id)
-                        }
-                    >
-                        <DeleteIcon />
-                    </IconButton>
-
-                </Tooltip>
-
-            </Stack>
-
-        )
-    }
-
-];
-
-    return (
-  <Layout>
-    <Box sx={{ width: "100%", p: 3 }}>
-
-      {/* Header */}
-      <Box
-        sx ={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3
-        }}
-      >
-
-        <Box>
-          <Typography
-            variant="h4"
-            sx={{ fontWeight: 700 }}
+          <Avatar
+            sx={{
+              bgcolor: "#1976d2",
+              width: 38,
+              height: 38
+            }}
           >
-            My Documents
-          </Typography>
+            <DescriptionIcon />
+          </Avatar>
 
           <Typography
-            color="text.secondary"
+            sx={{
+              fontWeight: 600
+            }}
           >
-            Manage all your uploaded documents
+            {params.row.documentName}
           </Typography>
+
         </Box>
 
-        <Button
-          variant="contained"
-          startIcon={<UploadFileIcon />}
-          onClick={() => navigate("/upload")}
+      )
+    },
+
+    {
+      field: "documentType",
+      headerName: "Type",
+      flex: 1,
+      minWidth: 120
+    },
+
+    {
+      field: "expiryDate",
+      headerName: "Expiry",
+      flex: 1,
+      minWidth: 120,
+
+      renderCell: (params) =>
+
+        params.value ?? "-"
+    },
+
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 1,
+      minWidth: 140,
+
+      renderCell: (params) =>
+        getStatusChip(params.value)
+    },
+
+    {
+      field: "confidence",
+      headerName: "Confidence",
+      flex: 0.08,
+      minWidth: 100,
+
+      renderCell: (params) => (
+
+        <Chip
+          label={`${params.value}%`}
+          color="primary"
+          size="small"
+        />
+
+      )
+    },
+
+    {
+      field: "actions",
+      headerName: "Actions",
+      sortable: false,
+      filterable: false,
+      minWidth: 140,
+
+      renderCell: (params) => (
+
+        <Stack
+          direction="row"
+          spacing={1}
         >
-          Upload Document
-        </Button>
+
+          <Tooltip title="View">
+
+            <IconButton
+              color="primary"
+              onClick={() =>
+                viewDocument(params.row.id)
+              }
+            >
+              <VisibilityIcon />
+            </IconButton>
+
+          </Tooltip>
+
+          <Tooltip title="Download">
+
+            <IconButton
+              color="success"
+              onClick={() =>
+                downloadDocument(
+                  params.row.id,
+                  params.row.documentName
+                )
+              }
+            >
+              <DownloadIcon />
+            </IconButton>
+
+          </Tooltip>
+
+          <Tooltip title="Delete">
+
+            <IconButton
+              color="error"
+              onClick={() =>
+                deleteDocument(params.row.id)
+              }
+            >
+              <DeleteIcon />
+            </IconButton>
+
+          </Tooltip>
+
+        </Stack>
+
+      )
+    }
+
+  ];
+
+  return (
+    <Layout>
+      <Box sx={{ width: "100%", p: 3 }}>
+
+        {/* Header */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3
+          }}
+        >
+
+          <Box>
+            <Typography
+              variant="h4"
+              sx={{ fontWeight: 700 }}
+            >
+              My Documents
+            </Typography>
+
+            <Typography
+              color="text.secondary"
+            >
+              Manage all your uploaded documents
+            </Typography>
+          </Box>
+
+          <Button
+            variant="contained"
+            startIcon={<UploadFileIcon />}
+            onClick={() => navigate("/upload")}
+          >
+            Upload Document
+          </Button>
+
+        </Box>
+
+        {/* Search */}
+
+        <Card sx={{ mb: 3 }}>
+
+          <CardContent>
+
+            <TextField
+              fullWidth
+              placeholder="Search documents..."
+              value={search}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  )
+                }
+              }}
+            />
+
+          </CardContent>
+
+        </Card>
+
+        {/* Grid */}
+
+        <Card>
+
+          <CardContent>
+
+            <DataGrid
+              rows={filteredDocuments}
+              columns={columns}
+              getRowId={(row) => row.id}
+              pageSizeOptions={[5, 10, 20]}
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    pageSize: 5,
+                    page: 0
+                  }
+                }
+              }}
+              disableRowSelectionOnClick
+              autoHeight
+              sx={{
+                width: "100%",
+                minWidth: 1100,
+                border: 0,
+
+                "& .MuiDataGrid-columnHeaders": {
+                  backgroundColor: "#F8FAFC",
+                  fontWeight: "bold"
+                }
+              }}
+            />
+
+          </CardContent>
+
+        </Card>
 
       </Box>
 
-      {/* Search */}
-
-      <Card sx={{ mb: 3 }}>
-
-        <CardContent>
-
-          <TextField
-            fullWidth
-            placeholder="Search documents..."
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                )
-              }
-            }}
-          />
-
-        </CardContent>
-
-      </Card>
-
-      {/* Grid */}
-
-      <Card>
-
-        <CardContent>
-
-          <DataGrid
-    rows={filteredDocuments}
-    columns={columns}
-    getRowId={(row) => row.id}
-    pageSizeOptions={[5, 10, 20]}
-    initialState={{
-        pagination: {
-            paginationModel: {
-                pageSize: 5,
-                page: 0
-            }
-        }
-    }}
-    disableRowSelectionOnClick
-    autoHeight
-    sx={{
-        width: "100%",
-        minWidth: 1100,
-        border: 0,
-
-        "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: "#F8FAFC",
-            fontWeight: "bold"
-        }
-    }}
-/>
-
-        </CardContent>
-
-      </Card>
-
-    </Box>
-
-  </Layout>
-);
+    </Layout>
+  );
 
 }
 

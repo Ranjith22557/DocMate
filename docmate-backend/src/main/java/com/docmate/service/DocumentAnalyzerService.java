@@ -17,7 +17,7 @@ public class DocumentAnalyzerService {
 
         String text = ocrText.toLowerCase().trim();
 
-        String documentType = "OTHER";
+        String documentType = "UNKNOWN";
         Integer confidence = 50;
 
         if (text.contains("passport")) {
@@ -27,7 +27,10 @@ public class DocumentAnalyzerService {
 
         } else if (text.contains("driving")
                 || text.contains("driving licence")
-                || text.contains("driving license")) {
+                || text.contains("driving license")
+                || text.contains("dl no")
+                || text.contains("lmv")
+                || text.contains("mcwg")) {
 
             documentType = "DRIVING_LICENSE";
             confidence = 90;
@@ -50,15 +53,55 @@ public class DocumentAnalyzerService {
             documentType = "RESUME";
             confidence = 95;
 
-        } else if (text.contains("certificate")
-                || text.contains("university")) {
+        } else if (text.contains("university")) {
 
             documentType = "CERTIFICATE";
             confidence = 80;
-        }
-        LocalDate expiryDate = extractExpiryDate(ocrText);
+        } else if (text.contains("birth")) {
 
-        boolean renewalRequired = expiryDate != null;
+            documentType = "BIRTH_CERTIFICATE";
+            confidence = 80;
+        } else if (text.contains("aadhaar") || text.contains("uidai")) {
+
+            documentType = "AADHAAR_CARD";
+            confidence = 80;
+        } else if (text.contains("fire") || text.contains("safety")) {
+
+            documentType = "FIRE_SAFETY_CERTIFICATE";
+            confidence = 70;
+        } else if (text.contains("food") || text.contains("food safety") || text.contains("fssai")) {
+
+            documentType = "FOOD_SAFETY";
+            confidence = 80;
+        } else if (text.contains("income") || text.contains("tax") || text.contains("income tax")) {
+
+            documentType = "PAN_CARD";
+            confidence = 80;
+        } else if (text.contains("election") || text.contains("election commission")) {
+
+            documentType = "VOTER_ID";
+            confidence = 80;
+        } else if (text.contains("pollution")) {
+
+            documentType = "POLLUTION_CERTIFICATE";
+            confidence = 60;
+        } else if (text.contains("vehicle") || text.contains("vehicle registration")) {
+
+            documentType = "VEHICLE_REGISTRATION";
+            confidence = 80;
+        }
+
+        LocalDate expiryDate;
+        boolean renewalRequired;
+
+        if (supportsExpiry(documentType)) {
+            expiryDate = extractExpiryDate(text);
+            renewalRequired = expiryDate != null;
+        } else {
+            expiryDate = null;
+            renewalRequired = false;
+        }
+
         return new DocumentAnalysisResult(
                 documentType,
                 null,
@@ -70,16 +113,20 @@ public class DocumentAnalyzerService {
 
     private LocalDate extractExpiryDate(String text) {
         try {
-            // Format: 10/01/2035 or 10-01-2035
-            Pattern numericPattern = Pattern.compile("(\\d{2})[-/](\\d{2})[-/](\\d{4})");
+            Pattern expiryPattern = Pattern.compile(
+                    "(expiry|expiry date|valid until|valid upto|valid till|expires on|date of expiry|expiration date)\\\\s*:?\\\\s*(\\\\d{2}[-/]\\\\d{2}[-/]\\\\d{4})",
+                    Pattern.CASE_INSENSITIVE
+            );
+            Matcher matcher = expiryPattern.matcher(text);
 
-            Matcher numericMatcher = numericPattern.matcher(text);
-            if (numericMatcher.find()) {
+            if (matcher.find()) {
+                String date = matcher.group(2);
+                String[] parts = date.split("[-/]");
 
                 return LocalDate.of(
-                        Integer.parseInt(numericMatcher.group(3)),
-                        Integer.parseInt(numericMatcher.group(2)),
-                        Integer.parseInt(numericMatcher.group(1))
+                        Integer.parseInt(parts[2]),
+                        Integer.parseInt(parts[1]),
+                        Integer.parseInt(parts[0])
                 );
             }
             // Format: 10 JAN 2035
@@ -116,5 +163,18 @@ public class DocumentAnalyzerService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private boolean supportsExpiry(String documentType) {
+
+        return switch (documentType.toUpperCase()) {
+
+            case "PASSPORT",
+                 "VISA",
+                 "DRIVING_LICENSE",
+                 "INSURANCE" -> true;
+
+            default -> false;
+        };
     }
 }
