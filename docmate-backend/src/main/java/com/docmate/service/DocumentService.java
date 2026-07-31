@@ -165,9 +165,10 @@ public class DocumentService {
                             );
 
                     return new AlertResponse(
+                            document.getId(),
                             document.getDocumentName(),
+                            document.getDocumentType(),
                             document.getExpiryDate(),
-                            daysRemaining,
                             status
                     );
                 })
@@ -195,5 +196,76 @@ public class DocumentService {
                         document.getConfidence()
                 ))
                 .toList();
+    }
+
+    public List<UpcomingRenewalResponse> getUpcomingRenewals() {
+
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        return documentRepository
+                .findByUserEmailAndExpiryDateIsNotNullOrderByExpiryDateAsc(email)
+                .stream()
+                .filter(document -> {
+
+                    String status = documentStatusService.getStatus(
+                            document.getExpiryDate(),
+                            document.getRenewalRequired()
+                    );
+
+                    return status.equals("EXPIRING_SOON")
+                            || status.equals("EXPIRED");
+
+                })
+                .limit(5)
+                .map(document -> new UpcomingRenewalResponse(
+
+                        document.getId(),
+                        document.getDocumentName(),
+                        document.getDocumentType(),
+                        document.getExpiryDate(),
+                        documentStatusService.getStatus(
+                                document.getExpiryDate(),
+                                document.getRenewalRequired()
+                        )
+
+                ))
+                .toList();
+
+    }
+
+    public List<AlertResponse> getAlerts() {
+
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        return documentRepository
+                .findByUserEmailAndExpiryDateIsNotNullOrderByExpiryDateAsc(email)
+                .stream()
+                .map(document -> {
+
+                    String status = documentStatusService.getStatus(
+                            document.getExpiryDate(),
+                            document.getRenewalRequired()
+                    );
+
+                    return new AlertResponse(
+                            document.getId(),
+                            document.getDocumentName(),
+                            document.getDocumentType(),
+                            document.getExpiryDate(),
+                            status
+                    );
+
+                })
+                .filter(alert ->
+                        alert.status().equals("EXPIRING_SOON")
+                                || alert.status().equals("EXPIRED"))
+                .toList();
+
     }
 }

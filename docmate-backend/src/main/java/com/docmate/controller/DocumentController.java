@@ -5,23 +5,22 @@ import com.docmate.entity.Document;
 import com.docmate.entity.User;
 import com.docmate.repository.DocumentRepository;
 import com.docmate.repository.UserRepository;
-import com.docmate.service.DocumentAnalyzerService;
-import com.docmate.service.DocumentService;
-import com.docmate.service.OcrService;
+import com.docmate.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import com.docmate.service.FileStorageService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -39,6 +38,7 @@ public class DocumentController {
     private final OcrService ocrService;
     private final DocumentRepository documentRepository;
     private final UserRepository userRepository;
+    private final TextExtractionService textExtractionService;
 
     @PostMapping
     public ResponseEntity<DocumentResponse> createDocument(
@@ -76,8 +76,9 @@ public class DocumentController {
             throws IOException {
 
         String filePath = fileStorageService.storeFile(file);
+        File storedFile = new File(filePath);
 
-        String ocrText = ocrService.extractText(new File(filePath));
+        String ocrText =  textExtractionService.extract(file,storedFile);
         DocumentAnalysisResult result = documentAnalyzerService.analyze(ocrText);
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -115,8 +116,8 @@ public class DocumentController {
         );
     }
 
-    @GetMapping("/alerts")
-    public ResponseEntity<List<AlertResponse>> getAlerts() {
+    @GetMapping("/dashboardalerts")
+    public ResponseEntity<List<AlertResponse>> getDashboardAlerts() {
 
         return ResponseEntity.ok(
                 documentService.getDashboardAlerts()
@@ -144,15 +145,23 @@ public class DocumentController {
     public ResponseEntity<Resource> viewDocument(
             @PathVariable UUID id) throws IOException {
 
-        Document document = documentRepository.findById(id).orElseThrow(() ->
-                        new RuntimeException("Document not found"));
+        Document document = documentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
 
         Path path = Paths.get(document.getFilePath());
+
         Resource resource = new UrlResource(path.toUri());
 
+        String contentType = Files.probeContentType(path);
+
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,"inline; filename=\"" +
-                        document.getFileName() +"\"")
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + document.getFileName() + "\"")
                 .body(resource);
     }
 
@@ -162,6 +171,30 @@ public class DocumentController {
         return ResponseEntity.ok(
                 documentService.getRecentDocuments()
         );
+
+    }
+
+    @GetMapping("/upcoming-renewals")
+    public ResponseEntity<List<UpcomingRenewalResponse>> getUpcomingRenewals() {
+
+        return ResponseEntity.ok(
+                documentService.getUpcomingRenewals()
+        );
+
+    }
+
+    @GetMapping("/alert")
+    public ResponseEntity<List<AlertResponse>> getAlerts() {
+        return ResponseEntity.ok(
+                documentService.getAlerts()
+        );
+    }
+
+    @GetMapping("/alerts/count")
+    public long getAlertCount() {
+        return documentService
+                .getDashboardAlerts()
+                .size();
 
     }
 }

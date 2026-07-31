@@ -53,6 +53,7 @@ public class AuthService {
             User user = User.builder()
                     .email(request.email())
                     .createdAt(LocalDateTime.now())
+                    .reminderDays(7)
                     .build();
             userRepository.save(user);
         }

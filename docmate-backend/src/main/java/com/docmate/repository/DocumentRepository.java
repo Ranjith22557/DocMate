@@ -23,4 +23,10 @@ public interface DocumentRepository
     List<Document> findAllWithUser();
 
     List<Document> findTop5ByUserEmailOrderByCreatedAtDesc(String email);
+
+    List<Document> findByUserEmailAndExpiryDateIsNotNullOrderByExpiryDateAsc(
+            String email
+    );
+
+    List<Document> findByReminderSentFalseAndUserIsNotNull();
 }
