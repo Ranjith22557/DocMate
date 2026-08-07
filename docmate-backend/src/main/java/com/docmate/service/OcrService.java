@@ -16,10 +16,10 @@ public class OcrService {
 
             ITesseract tesseract = new Tesseract();
 
-            tesseract.setDatapath(
-                    "/usr/share/tesseract-ocr/5/tessdata"
-            );
+            String tessDataPath = System.getenv()
+                    .getOrDefault("TESSDATA_PATH", "/usr/share/tesseract-ocr/5/tessdata");
 
+            tesseract.setDatapath(tessDataPath);
             tesseract.setLanguage("eng");
 
             return tesseract.doOCR(file);
