@@ -1,22 +1,25 @@
-# Stage 1: Build the application
-FROM maven:3.9.8-eclipse-temurin-21 AS builder
+# ---------- Build Stage ----------
+FROM maven:3.9.8-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
 COPY pom.xml .
-
-RUN mvn dependency:go-offline
-
 COPY src ./src
 
 RUN mvn clean package -DskipTests
 
-# Stage 2: Run the application
+# ---------- Runtime Stage ----------
 FROM eclipse-temurin:21-jre
+
+RUN apt-get update && \
+    apt-get install -y \
+        tesseract-ocr \
+        tesseract-ocr-eng && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
