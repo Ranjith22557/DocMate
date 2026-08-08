@@ -19,7 +19,7 @@ public class CorsConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(
                                 "http://localhost:5173",
-                                "https://docmate-frontend-1isa.onrender.com"
+                                "https://docmate-frontend-lisa.onrender.com"
                         )
                         .allowedMethods(
                                 "GET",
