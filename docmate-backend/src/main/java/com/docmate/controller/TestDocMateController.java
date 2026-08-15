@@ -20,11 +20,11 @@ public class TestDocMateController {
     @GetMapping("/test-email")
     public String testEmail() {
 
-        emailService.sendReminder(
+        /*emailService.sendReminder(
                 "ranjithannadurai@qualiantech.com",
                 "Passport",
                 "2027-01-10"
-        );
+        );*/
 
         return "Mail Sent";
     }
