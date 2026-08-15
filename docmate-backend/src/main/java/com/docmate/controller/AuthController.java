@@ -20,7 +20,15 @@ public class AuthController {
     public ResponseEntity<String> sendOtp(
             @Valid @RequestBody SendOtpRequest request) {
 
+        System.out.println("========== SEND OTP CONTROLLER CALLED ==========");
+
         authService.sendOtp(request);
+
+        System.out.println("========== SEND OTP SERVICE COMPLETED ==========");
+
+
+
+        //authService.sendOtp(request);
         return ResponseEntity.ok("OTP Sent Successfully");
     }
 
