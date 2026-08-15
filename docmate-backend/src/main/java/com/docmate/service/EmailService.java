@@ -13,7 +13,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    public void sendOtpEmail(String email, String otp) {
+    /*public void sendOtpEmail(String email, String otp) {
 
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -27,10 +27,17 @@ public class EmailService {
         );
 
         mailSender.send(message);
+    }*/
+
+    public void sendOtpEmail(String email, String otp) {
+        System.out.println("=================================");
+        System.out.println("OTP for " + email + " = " + otp);
+        System.out.println("=================================");
     }
+}
 
     //Expiry email service
-    public void sendExpiryReminder(String email,String documentName,LocalDate expiryDate) {
+    /*public void sendExpiryReminder(String email,String documentName,LocalDate expiryDate) {
 
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -53,4 +60,4 @@ public class EmailService {
 
         mailSender.send(message);
     }
-}
+}*/

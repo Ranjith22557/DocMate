@@ -43,7 +43,7 @@ public class DocumentReminderScheduler {
                     LocalDate.now(),
                     document.getExpiryDate()
             );
-            if (daysRemaining <= document.getUser().getReminderDays()) {
+            /*if (daysRemaining <= document.getUser().getReminderDays()) {
                 emailService.sendReminder(
                         document.getUser().getEmail(),
                         document.getDocumentName(),
@@ -51,7 +51,7 @@ public class DocumentReminderScheduler {
                 );
                 document.setReminderSent(true);
                 documentRepository.save(document);
-            }
+            }*/
         }
         log.info("Document Reminder Scheduler completed.");
     }
